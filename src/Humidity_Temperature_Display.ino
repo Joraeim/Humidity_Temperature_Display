@@ -13,10 +13,12 @@ Sparkfun_S7S display = Sparkfun_S7S();
 int LED = D7;
 // setup() runs once, when the device is first turned on.
 void setup() {
-
   sensor.begin();
   display.begin();
-  display.WriteValue(0xFFFF);
+  uint8_t display_data[4] = {0xF, 0xF, 0xF, 0xF};
+  display.WriteValue(display_data, 4);
+  delay(500);
+  display.ClearDisplay();
   pinMode(LED, OUTPUT);
 
 }
@@ -36,15 +38,20 @@ void loop() {
     delay(2000);
     //display.WriteValue("FAIL");
   }
-  //display.WriteValue("H");
-  //delay(500);
+  display.WriteValue((uint8_t)0x48); // Write "H" to the display
+  delay(500);
+  display.ClearDisplay();
   display.WriteValue(humidity);
   delay(1000);
 
-  //display.WriteValue("T");
-  //delay(500);
+  display.ClearDisplay();
+
+  display.WriteValue((uint8_t)0x54); // Write "t" to the Display
+  delay(500);
+  display.ClearDisplay();
   display.WriteValue(temperature);
   delay(1000);
+  display.ClearDisplay();
 
   toggleLED(1);
   //delay(10000);

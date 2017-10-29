@@ -43,12 +43,6 @@ bool Sparkfun_S7S::begin(void)
     Wire.begin();
   }
 
-  //By default .begin() will set I2C SCL to Standard Speed mode of 100kHz
-  //Wire.setClock(400000); //Optional - set I2C SCL to High Speed Mode of 400kHz
-
-  //Serial.begin(9600); //Start serial communication at 9600 for debug statements
-  //Serial.println("OpenSegment Example Code");
-
   //Send the reset command to the display - this forces the cursor to return to
   // the beginning of the display
   reset();
@@ -64,21 +58,43 @@ void Sparkfun_S7S::reset(void)
 }
 
 //Given a number, i2cSendValue chops up an integer into four values and sends them out over I2C
-void Sparkfun_S7S::WriteValue(int value)
+// void Sparkfun_S7S::WriteValue(uint value)
+// {
+//   int8_t data[4];
+//   Wire.beginTransmission(_i2caddr); // Start transmission to device @ _i2caddr
+//   value %= 10000; //Drop anything over four digits.
+//   data[0] = value / 1000; //Set the left most digit
+//   value %= 1000; //Now remove the left most digit from the number we want to display
+//   data[1]= value / 100;
+//   value %= 100;
+//   data[2] = value / 10;
+//   value %= 10;
+//   data[3] = value;//Send the right most digit
+//   WriteValue(data, 4);
+//   Wire.endTransmission(); //Stop I2C transmission
+//   return;
+// }
+
+void Sparkfun_S7S::WriteValue(float value)
 {
-  Wire.beginTransmission(_i2caddr); // transmit to device #1
-  Wire.write(value / 1000); //Send the left most digit
-  value %= 1000; //Now remove the left most digit from the number we want to display
-  Wire.write(value / 100);
-  value %= 100;
-  Wire.write(value / 10);
-  value %= 10;
-  Wire.write(value); //Send the right most digit
-  Wire.endTransmission(); //Stop I2C transmission
+  uint8_t display_data[4];
+  display_data[0]= (static_cast<uint8_t>(value) % 100) / 10;
+  display_data[1]= (static_cast<uint8_t>(value) % 10);
+  SetDecimalLoc(2);
+  display_data[2]= (static_cast<uint8_t>(value * 10) % 10);
+  display_data[3]= (static_cast<uint8_t>(value * 100) % 10);
+  WriteValue(display_data, 4);
   return;
 }
 
-void Sparkfun_S7S::WriteValue(int8_t value[], int length)
+void Sparkfun_S7S::WriteValue(uint8_t value)
+{
+  uint8_t data[] = {value};
+  WriteValue(data, 1);
+  return;
+}
+
+void Sparkfun_S7S::WriteValue(uint8_t value[], int length)
 {
   Wire.beginTransmission(_i2caddr);
   for(int i = 0; i < length; i++)
@@ -86,5 +102,43 @@ void Sparkfun_S7S::WriteValue(int8_t value[], int length)
     Wire.write(value[i]);
   }
   Wire.endTransmission();
+  return;
+}
+
+void Sparkfun_S7S::SetCursorLoc(int location)
+{
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(CURSOR_CONTROL);
+  if(location < 0)
+  {
+    location = 0;
+  }
+  else if(location > 3)
+  {
+    location = 3;
+  }
+
+  Wire.write(location);
+  Wire.endTransmission();
+  delay(50);
+  return;
+}
+
+void Sparkfun_S7S::ClearDisplay()
+{
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(CLEAR_DISPLAY);
+  Wire.endTransmission();
+  delay(50);
+  return;
+}
+
+void Sparkfun_S7S::SetDecimalLoc(int location)
+{
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(DECIMAL_CONTROL);
+  Wire.write(location);
+  Wire.endTransmission();
+  delay(50);
   return;
 }

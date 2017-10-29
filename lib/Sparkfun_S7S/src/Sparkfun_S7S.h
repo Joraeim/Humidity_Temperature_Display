@@ -49,8 +49,14 @@ class Sparkfun_S7S {
   Sparkfun_S7S(void);
   bool begin(void);
   void reset(void);
-  void WriteValue(int value);
-  void WriteValue(int8_t value[], int length);
+  //void WriteValue(uint value);
+  //void WriteValue(float value, int precision);
+  void WriteValue(float value);
+  void WriteValue(uint8_t value);
+  void WriteValue(uint8_t value[], int length);
+  void SetCursorLoc(int location);
+  void ClearDisplay(void);
+  void SetDecimalLoc(int location);
 
  private:
   int8_t  _i2caddr;
