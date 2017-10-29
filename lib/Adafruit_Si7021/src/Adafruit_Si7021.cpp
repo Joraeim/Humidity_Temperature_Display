@@ -21,8 +21,6 @@
 
 
 #include "Adafruit_Si7021.h"   // Use for Build IDE
-// #include "Adafruit_Si7021.h"               // Use for local build
-
 
 /**************************************************************************/
 
@@ -32,7 +30,10 @@ Adafruit_Si7021::Adafruit_Si7021(void) {
 }
 
 bool Adafruit_Si7021::begin(void) {
-  Wire.begin();
+  if(!Wire.isEnabled())
+  {
+    Wire.begin();
+  }
 
   reset();
   if (readRegister8(SI7021_READRHT_REG_CMD) != 0x3A) return false;

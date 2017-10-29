@@ -34,9 +34,20 @@ void loop() {
   if(!success) {
     toggleLED(5);
     delay(2000);
+    //display.WriteValue("FAIL");
   }
+  //display.WriteValue("H");
+  //delay(500);
+  display.WriteValue(humidity);
+  delay(1000);
+
+  //display.WriteValue("T");
+  //delay(500);
+  display.WriteValue(temperature);
+  delay(1000);
+
   toggleLED(1);
-  delay(10000);
+  //delay(10000);
 }
 
 void toggleLED(int count)

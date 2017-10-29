@@ -49,7 +49,8 @@ class Sparkfun_S7S {
   Sparkfun_S7S(void);
   bool begin(void);
   void reset(void);
-  bool WriteValue(int value)
+  void WriteValue(int value);
+  void WriteValue(int8_t value[], int length);
 
  private:
   int8_t  _i2caddr;

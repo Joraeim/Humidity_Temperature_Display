@@ -29,16 +29,19 @@
 */
 
 #include <Wire.h>
+#include "Sparkfun_S7S.h"
 
 Sparkfun_S7S::Sparkfun_S7S(void) {
   _i2caddr = DISPLAY_ADDRESS;
 }
 
-int cycles = 0;
-
 bool Sparkfun_S7S::begin(void)
 {
-  Wire.begin(); //Join the bus as master
+  //If the I2C bus is not enabled, enable it and join it as a master.
+  if(!Wire.isEnabled())
+  {
+    Wire.begin();
+  }
 
   //By default .begin() will set I2C SCL to Standard Speed mode of 100kHz
   //Wire.setClock(400000); //Optional - set I2C SCL to High Speed Mode of 400kHz
@@ -46,27 +49,42 @@ bool Sparkfun_S7S::begin(void)
   //Serial.begin(9600); //Start serial communication at 9600 for debug statements
   //Serial.println("OpenSegment Example Code");
 
-  //Send the reset command to the display - this forces the cursor to return to the beginning of the display
+  //Send the reset command to the display - this forces the cursor to return to
+  // the beginning of the display
   reset();
 }
 
-void Sparkfun_S7S::reset(void) {
+void Sparkfun_S7S::reset(void)
+{
   Wire.beginTransmission(_i2caddr);
   Wire.write(CLEAR_DISPLAY);
   Wire.endTransmission();
   delay(50);
+  return;
 }
 
 //Given a number, i2cSendValue chops up an integer into four values and sends them out over I2C
-void WriteValue(int value)
+void Sparkfun_S7S::WriteValue(int value)
 {
   Wire.beginTransmission(_i2caddr); // transmit to device #1
   Wire.write(value / 1000); //Send the left most digit
-  tempCycles %= 1000; //Now remove the left most digit from the number we want to display
+  value %= 1000; //Now remove the left most digit from the number we want to display
   Wire.write(value / 100);
-  tempCycles %= 100;
+  value %= 100;
   Wire.write(value / 10);
-  tempCycles %= 10;
+  value %= 10;
   Wire.write(value); //Send the right most digit
   Wire.endTransmission(); //Stop I2C transmission
+  return;
+}
+
+void Sparkfun_S7S::WriteValue(int8_t value[], int length)
+{
+  Wire.beginTransmission(_i2caddr);
+  for(int i = 0; i < length; i++)
+  {
+    Wire.write(value[i]);
+  }
+  Wire.endTransmission();
+  return;
 }
